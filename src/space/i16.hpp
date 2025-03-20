@@ -42,6 +42,10 @@ struct I16 {
         return Computer{.dim = dim, .data = data.data(), .me = q};
     }
 
+    inline point_t GetPoint(size_t idx) {
+        return data.data() + dim * idx;
+    }
+
     using computer_t = Computer;
     using dist_t = computer_t::dist_t;
 };

@@ -11,22 +11,10 @@ class Hdf5Reader final {
     static Hdf5Reader Hold(hid_t fd);
     ~Hdf5Reader();
 
-    template <space::Space S>
-    S ReadSpace();
-
-    template <>
-    space::I16 ReadSpace<space::I16>() {
-        return _ReadSpaceI16();
-    }
-
-    template <>
-    space::I32 ReadSpace<space::I32>() {
-        return _ReadSpaceI32();
-    }
+    space::I16 ReadI16(std::string_view dset_name);
 
    private:
-    Hdf5Reader(hid_t fd);
+    hid_t file_id_;
 
-    space::I16 _ReadSpaceI16();
-    space::I32 _ReadSpaceI32();
+    explicit Hdf5Reader(hid_t fd);
 };
