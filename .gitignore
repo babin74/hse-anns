@@ -16,3 +16,4 @@ datasets/*
 .clang-format
 **__pycache__**
 !.gitkeep
+.venv

@@ -32,17 +32,17 @@ struct I16 {
 
     inline size_t Size() const { return data.size() / dim; }
 
-    inline Computer GetComputer(size_t idx) {
+    inline Computer GetComputer(size_t idx) const {
         return Computer{
             .dim = dim, .data = data.data(), .me = data.data() + dim * idx};
     }
 
     using point_t = const int16_t*;
-    inline Computer GetComputer(point_t q) {
+    inline Computer GetComputer(point_t q) const {
         return Computer{.dim = dim, .data = data.data(), .me = q};
     }
 
-    inline point_t GetPoint(size_t idx) {
+    inline point_t GetPoint(size_t idx) const {
         return data.data() + dim * idx;
     }
 
