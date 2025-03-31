@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.31)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native")
 project(hse-anns)
 
 find_package(HDF5 REQUIRED COMPONENTS C CXX)

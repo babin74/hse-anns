@@ -1,9 +1,11 @@
 #pragma once
 
+#include <immintrin.h>
 #include <cstdint>
 #include <vector>
 
 #include "space.hpp"
+#include "immintrin.h"
 
 namespace space {
 

@@ -18,6 +18,7 @@ struct GreedyNet {
     size_t shard_count, pool_size;
     std::vector<size_t> shard_cuts;
     std::vector<size_t> neighbours_;
+    size_t eval_dist;
 
     GreedyNet(const space_t& space) : space(space), n(space.Size()), go(n) {
         shard_count = 256;
@@ -65,12 +66,14 @@ struct GreedyNet {
         std::set<size_t> used;
         size_t jbest = shard_cuts[sid];
         dist_t dbest = comp.Distance(jbest);
+        eval_dist++;
         while (true) {
             bool any = false;
             for (size_t j : go[jbest]) {
                 if (!used.insert(j).second)
                     continue;
                 dist_t d = comp.Distance(j);
+                eval_dist++;
                 if (dbest > d) {
                     dbest = d;
                     jbest = j;
@@ -93,6 +96,7 @@ struct GreedyNet {
         std::priority_queue<std::tuple<dist_t, size_t, size_t>> que;
         size_t jbest = shard_cuts[sid];
         dist_t dbest = comp.Distance(jbest);
+        eval_dist++;
         que.emplace(dbest, jbest, 0);
         int cnt = 0;
         while (!que.empty()) {
@@ -111,6 +115,7 @@ struct GreedyNet {
                     continue;
 
                 const dist_t d = comp.Distance(j);
+                eval_dist++;
                 if (d < cur_dist) {
                     que.emplace(d, j, 0);
                     used.insert(j);
@@ -134,6 +139,7 @@ struct GreedyNet {
 
     // Search k nearest points to point q
     std::vector<size_t> Search(space_t::point_t q, size_t k) {
+        eval_dist = 0;
         assert(k == 1);
         auto comp = space.GetComputer(q);
 
