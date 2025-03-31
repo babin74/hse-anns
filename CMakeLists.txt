@@ -7,7 +7,7 @@ project(hse-anns)
 find_package(HDF5 REQUIRED COMPONENTS C CXX)
 find_package(Catch2 3 REQUIRED)
 
-add_executable(tann src/main.cpp src/drivers/hdf5.cpp) # Teraqqq's ANN
+add_executable(tann src/main.cpp src/drivers/hdf5.cpp src/task/build_and_test.cpp) # Teraqqq's ANN
 target_include_directories(tann PRIVATE src)
 target_link_libraries(tann hdf5::hdf5_cpp hdf5::hdf5)
 

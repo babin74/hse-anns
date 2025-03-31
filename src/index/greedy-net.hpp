@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <queue>
 #include <set>
 #include <vector>
 #include "space/i16.hpp"
@@ -14,12 +15,13 @@ struct GreedyNet {
     const size_t n;
     std::vector<std::vector<size_t>> go;
 
-    size_t shard_count;
+    size_t shard_count, pool_size;
     std::vector<size_t> shard_cuts;
     std::vector<size_t> neighbours_;
 
     GreedyNet(const space_t& space) : space(space), n(space.Size()), go(n) {
         shard_count = 256;
+        pool_size = 0;
     }
 
     // Time complexity: O(n^2) calculating distances
@@ -82,6 +84,54 @@ struct GreedyNet {
         }
     }
 
+    std::pair<dist_t, size_t> SearchInShardWithPool(space_t::computer_t& comp,
+                                                    size_t sid) {
+        if (pool_size == 0)
+            return SearchInShard(comp, sid);
+
+        std::set<size_t> used;
+        std::priority_queue<std::tuple<dist_t, size_t, size_t>> que;
+        size_t jbest = shard_cuts[sid];
+        dist_t dbest = comp.Distance(jbest);
+        que.emplace(dbest, jbest, 0);
+        int cnt = 0;
+        while (!que.empty()) {
+            bool any = false;
+            auto [cur_dist, cur, ptr] = que.top();
+            que.pop();
+
+            if (cur_dist < dbest) {
+                dbest = cur_dist;
+                jbest = cur;
+            }
+
+            while (ptr != go[cur].size()) {
+                const size_t j = go[cur][ptr++];
+                if (used.count(j))
+                    continue;
+
+                const dist_t d = comp.Distance(j);
+                if (d < cur_dist) {
+                    que.emplace(d, j, 0);
+                    used.insert(j);
+                    any = true;
+
+                    if (que.size() > pool_size)
+                        que.pop();
+                    break;
+                }
+            }
+
+            if (any) {
+                que.emplace(cur_dist, cur, ptr);
+                if (que.size() > pool_size)
+                    que.pop();
+            }
+        }
+
+        return {dbest, jbest};
+    }
+
     // Search k nearest points to point q
     std::vector<size_t> Search(space_t::point_t q, size_t k) {
         assert(k == 1);
@@ -90,7 +140,7 @@ struct GreedyNet {
         using cand_t = std::pair<dist_t, size_t>;
         std::vector<cand_t> cands(shard_count);
         for (size_t sid = 0; sid < shard_count; ++sid) {
-            cands[sid] = SearchInShard(comp, sid);
+            cands[sid] = SearchInShardWithPool(comp, sid);
         }
 
         size_t ans = std::min_element(cands.begin(), cands.end())->second;

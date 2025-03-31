@@ -8,7 +8,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
-#include <queue>
+#include <string_view>
 #include <vector>
 #include "index/greedy-net.hpp"
 #include "index/linear.hpp"
@@ -17,8 +17,19 @@
 const char* dataset_dirname = "../datasets/siftsmall-128-euclidean.hdf5";
 
 int main(int argc, char** argv) {
-    assert(argc == 2);
-    const int shard_count = atoi(argv[1]);
+    if (argc > 1) {
+        if (std::string_view(argv[1]) == "test") {
+            assert(argc > 2);
+            if (std::string_view(argv[2]) == "greedy-net") {
+                return task::TestGreedyNetParams(argc, argv);
+            }
+        }
+    }
+
+    // return task::TestGreedyNetParams(argc, argv);
+
+    const int shard_count = 4;
+    const int pool_size = 4;
 
     auto reader = Hdf5Reader::Open(dataset_dirname);
     auto space_test = reader.ReadI16("/test");
@@ -29,18 +40,21 @@ int main(int argc, char** argv) {
     assert(dim == space_train.dim);
     constexpr size_t k = 1;
 
-    // std::cerr << "[Linear Search]" << std::endl;
+    std::cerr << "[Linear Search]" << std::endl;
     auto jans =
-        task::BuildAndTest<LinearIndex, space::I16>(space_train, space_test, k, false);
+        task::BuildAndTest<LinearIndex, space::I16>(space_train, space_test, k);
 
-    // std::cerr << "[Greedy Network]" << std::endl;
+    std::cerr << "[Greedy Network]" << std::endl;
+    std::cerr << "shard_count = " << shard_count << std::endl;
+    std::cerr << "pool_size   = " << pool_size << std::endl;
     GreedyNet search_greedy(space_train);
     search_greedy.shard_count = shard_count;
+    search_greedy.pool_size = pool_size;
     auto pans =
-        task::BuildAndTest<GreedyNet, space::I16>(search_greedy, space_test, k, false);
+        task::BuildAndTest<GreedyNet, space::I16>(search_greedy, space_test, k);
 
     auto qps = (double)1e9 / pans.search_time * space_test.Size();
-    // std::cerr << "QPS=" << qps << std::endl;
+    std::cerr << "QPS=" << qps << std::endl;
 
     size_t sum_recall = 0;
     for (size_t i = 0; i < space_test.Size(); ++i) {
@@ -59,6 +73,6 @@ int main(int argc, char** argv) {
                 ++sum_recall;
     }
     double recall = (double)sum_recall / (space_test.Size() * k) * 100;
-    // std::cerr << "recall=" << recall << std::endl;
+    std::cerr << "recall=" << recall << std::endl;
     std::cout << std::fixed << std::setprecision(3) << qps << " " << recall << std::endl;
 }
