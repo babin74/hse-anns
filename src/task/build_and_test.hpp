@@ -96,5 +96,6 @@ inline BuildAndTestResult BuildAndTest(Searcher& searcher, const Space& test,
 }
 
 int TestGreedyNetParams(int argc, char** argv);
+int TestHnswParams(int argc, char** argv);
 
 }  // namespace task

@@ -12,6 +12,7 @@
 #include <thread>
 #include <vector>
 #include "index/greedy-net.hpp"
+#include "index/hnsw.hpp"
 #include "index/linear.hpp"
 #include "task/build_and_test.hpp"
 
@@ -23,6 +24,9 @@ int main(int argc, char** argv) {
             assert(argc > 2);
             if (std::string_view(argv[2]) == "greedy-net") {
                 return task::TestGreedyNetParams(argc, argv);
+            }
+            if (std::string_view(argv[2]) == "hnsw") {
+                return task::TestHnswParams(argc, argv);
             }
         }
     }
@@ -48,11 +52,10 @@ int main(int argc, char** argv) {
     std::cerr << "[Greedy Network]" << std::endl;
     std::cerr << "shard_count = " << shard_count << std::endl;
     std::cerr << "pool_size   = " << pool_size << std::endl;
-    GreedyNet search_greedy(space_train);
-    search_greedy.shard_count = shard_count;
-    search_greedy.pool_size = pool_size;
+    HierarchicalNSW search(space_train, space_train.Size());
+    search.setEf(20);
     auto pans =
-        task::BuildAndTest<GreedyNet, space::I16>(search_greedy, space_test, k);
+        task::BuildAndTest<HierarchicalNSW, space::I16>(search, space_test, k);
 
     auto qps = (double)1e9 / pans.search_time * space_test.Size();
     std::cerr << "QPS=" << qps << std::endl;

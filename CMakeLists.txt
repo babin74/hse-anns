@@ -12,7 +12,7 @@ find_package(Catch2 3 REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-add_executable(tann src/main.cpp src/drivers/hdf5.cpp src/task/build_and_test.cpp src/index/greedy-net.cpp) # Teraqqq's ANN
+add_executable(tann src/main.cpp src/drivers/hdf5.cpp src/task/build_and_test.cpp src/index/greedy-net.cpp src/index/hnsw.cpp) # Teraqqq's ANN
 target_include_directories(tann PRIVATE src)
 target_link_libraries(tann PRIVATE hdf5::hdf5_cpp hdf5::hdf5)
 target_link_libraries(tann PRIVATE Threads::Threads)

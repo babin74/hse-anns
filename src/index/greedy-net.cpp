@@ -67,6 +67,7 @@ std::pair<dist_t, size_t> GreedyNet::SearchInShard(space_t::computer_t& comp,
                                                    size_t sid) {
     size_t jbest = shard_cuts[sid];
     dist_t dbest = comp.Distance(jbest);
+    ++eval_dist;
     while (true) {
         bool any = false;
         for (size_t j : go[jbest]) {
@@ -75,6 +76,7 @@ std::pair<dist_t, size_t> GreedyNet::SearchInShard(space_t::computer_t& comp,
             used[j] = utimer;
 
             dist_t d = comp.Distance(j);
+            ++eval_dist;
             if (dbest > d) {
                 dbest = d;
                 jbest = j;
@@ -96,7 +98,7 @@ std::pair<dist_t, size_t> GreedyNet::SearchInShardWithPool(
     std::priority_queue<std::tuple<dist_t, size_t, size_t>> que;
     size_t jbest = shard_cuts[sid];
     dist_t dbest = comp.Distance(jbest);
-    // eval_dist++;
+    eval_dist++;
     que.emplace(dbest, jbest, 0);
     int cnt = 0;
     while (!que.empty()) {
@@ -115,7 +117,7 @@ std::pair<dist_t, size_t> GreedyNet::SearchInShardWithPool(
                 continue;
 
             const dist_t d = comp.Distance(j);
-            // eval_dist++;
+            eval_dist++;
             if (d < cur_dist) {
                 que.emplace(d, j, 0);
                 used[j] = utimer;
