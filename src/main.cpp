@@ -9,6 +9,7 @@
 #include <cmath>
 #include <iostream>
 #include <string_view>
+#include <thread>
 #include <vector>
 #include "index/greedy-net.hpp"
 #include "index/linear.hpp"
@@ -28,7 +29,7 @@ int main(int argc, char** argv) {
 
     // return task::TestGreedyNetParams(argc, argv);
 
-    const int shard_count = 4;
+    const int shard_count = 16;
     const int pool_size = 4;
 
     auto reader = Hdf5Reader::Open(dataset_dirname);
